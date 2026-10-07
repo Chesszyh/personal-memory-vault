@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN" data-pmv-page="archive-export">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IndexedDB 只读归档导出</title>
+    <link rel="stylesheet" href="export.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Personal Memory Vault</p>
+        <h1>IndexedDB 只读归档导出</h1>
+        <p class="lede">
+          本页面只读取恢复工作副本中的目标数据库。它没有站点、网络、后台、同步或下载权限。
+        </p>
+      </header>
+
+      <section class="card" aria-labelledby="preflight-heading">
+        <div class="section-heading">
+          <h2 id="preflight-heading">预检</h2>
+          <span id="status-badge" class="badge badge-pending">检查中</span>
+        </div>
+        <dl id="preflight-details" class="details"></dl>
+        <p id="preflight-message" class="message" role="status" aria-live="polite">
+          正在确认扩展 ID 和 IndexedDB 元数据……
+        </p>
+      </section>
+
+      <section class="card" aria-labelledby="export-heading">
+        <h2 id="export-heading">导出</h2>
+        <label for="snapshot-id">Vault Snapshot ID</label>
+        <input
+          id="snapshot-id"
+          type="text"
+          maxlength="200"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="chatgpt-extension-2026-08-07-macos-default"
+        >
+        <p class="hint">必须使用稳定、唯一的快照标识；它会写入每条 NDJSON 证据记录。</p>
+        <button id="export-button" type="button" disabled>选择目录并开始导出</button>
+        <p id="export-message" class="message" role="status" aria-live="polite"></p>
+        <progress id="export-progress" value="0" max="1" hidden></progress>
+      </section>
+
+      <section class="card safety" aria-labelledby="safety-heading">
+        <h2 id="safety-heading">硬性边界</h2>
+        <ul>
+          <li>只打开数据库版本 2，不创建、不升级、不写入数据库。</li>
+          <li>使用 readonly transaction 和分批 cursor，不调用 getAll()。</li>
+          <li>七个预期 store 缺失或任一计数不闭合时，manifest 状态为 failed。</li>
+          <li>未知 structured-clone 类型会使导出失败，不会被字符串化或静默丢弃。</li>
+          <li>ExtensionStorage 不在读取范围内。</li>
+        </ul>
+      </section>
+    </main>
+
+    <script type="module" src="export.js"></script>
+  </body>
+</html>

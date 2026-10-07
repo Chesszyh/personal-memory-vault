@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>记忆审核工作台</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <div id="app" class="app-shell" data-screen-label="Memory Review Workbench">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <div class="brand-copy">
+            <strong>记忆审核工作台</strong>
+            <small>PERSONAL MEMORY VAULT</small>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span id="save-state" class="save-state"><span class="save-dot"></span>所有更改自动保存</span>
+          <button id="help-toggle" class="quiet-button" type="button">判断指南</button>
+          <button id="theme-toggle" class="icon-button" type="button" aria-label="切换深浅主题" title="切换深浅主题">◐</button>
+          <button id="rebuild-button" class="primary-button" type="button">重建画像与迁移包</button>
+        </div>
+      </header>
+
+      <section class="progress-strip" aria-label="审核进度">
+        <div class="progress-copy">
+          <strong id="progress-label">正在加载候选…</strong>
+          <span id="progress-detail">从本地 memory.sqlite 读取</span>
+        </div>
+        <div class="progress-track"><span id="progress-fill"></span></div>
+        <div id="status-counts" class="status-counts"></div>
+      </section>
+
+      <div class="workspace">
+        <aside class="filter-rail" aria-label="筛选器">
+          <section class="filter-section">
+            <label class="select-label" for="batch-select">候选批次</label>
+            <select id="batch-select"></select>
+          </section>
+
+          <label class="search-field">
+            <span>搜索候选</span>
+            <input id="search-input" type="search" placeholder="关键词或 candidate ID" autocomplete="off">
+          </label>
+
+          <section class="filter-section">
+            <h2>审核状态</h2>
+            <div id="status-filters" class="filter-stack"></div>
+          </section>
+          <section class="filter-section">
+            <h2>候选类型</h2>
+            <div id="kind-filters" class="filter-stack"></div>
+          </section>
+          <section class="filter-section">
+            <h2>置信度与日期</h2>
+            <label class="select-label" for="confidence-select">最低置信度</label>
+            <select id="confidence-select">
+              <option value="">全部</option>
+              <option value="0.5">至少 0.50</option>
+              <option value="0.7">至少 0.70</option>
+              <option value="0.9">至少 0.90</option>
+            </select>
+            <div class="date-grid">
+              <label class="select-label" for="date-from">起始日期<input id="date-from" type="date"></label>
+              <label class="select-label" for="date-to">结束日期<input id="date-to" type="date"></label>
+            </div>
+          </section>
+          <section class="filter-section">
+            <label class="select-label" for="sort-select">排序</label>
+            <select id="sort-select">
+              <option value="newest">最近消息优先</option>
+              <option value="oldest">最早消息优先</option>
+              <option value="kind">按类型</option>
+              <option value="status">按状态</option>
+            </select>
+          </section>
+          <section class="rail-note">
+            <strong>候选不等于事实</strong>
+            <p>正则只是找到值得看一眼的用户原话。确认前，请先看上下文并把原话改成可独立理解的一条记忆。</p>
+          </section>
+        </aside>
+
+        <main class="candidate-pane">
+          <div class="list-toolbar">
+            <label class="select-all"><input id="select-all" type="checkbox"><span>选择当前结果</span></label>
+            <span id="result-count" class="result-count"></span>
+            <button id="clear-selection" class="text-button" type="button">清空选择</button>
+          </div>
+          <div id="candidate-state" class="center-state" role="status">正在读取候选…</div>
+          <div id="candidate-list" class="candidate-list" aria-live="polite"></div>
+        </main>
+
+        <aside id="detail-pane" class="detail-pane" aria-label="候选详情">
+          <div id="detail-empty" class="detail-empty">
+            <strong>选择一条候选</strong>
+            <p>这里会显示原始上下文、可编辑记忆、关联候选与审核历史。</p>
+          </div>
+          <div id="detail-content" class="detail-content" hidden>
+            <header class="detail-header">
+              <div>
+                <p id="detail-eyebrow" class="eyebrow"></p>
+                <h1 id="detail-title"></h1>
+              </div>
+              <button id="detail-close" class="icon-button detail-close" type="button" aria-label="关闭详情">×</button>
+            </header>
+
+            <section class="editor-section">
+              <div class="section-heading">
+                <div><strong>确认后保存的记忆</strong><small>编辑不会覆盖原始证据</small></div>
+                <span id="editor-state" class="editor-state">已保存</span>
+              </div>
+              <textarea id="statement-editor" rows="6" maxlength="4000"></textarea>
+              <div class="editor-footer">
+                <span id="character-count"></span>
+                <button id="restore-original" class="quiet-button" type="button">恢复原话</button>
+                <button id="save-edit" class="primary-button compact" type="button">保存表述</button>
+              </div>
+              <details class="original-disclosure">
+                <summary>查看提取器命中的完整原话</summary>
+                <p id="original-statement"></p>
+              </details>
+            </section>
+
+            <section class="context-section">
+              <div class="section-heading">
+                <div><strong>来源上下文</strong><small id="source-reference"></small></div>
+              </div>
+              <div id="context-list" class="context-list"></div>
+            </section>
+
+            <section class="related-section">
+              <div class="section-heading">
+                <div><strong>可能重复或冲突</strong><small>仅作审核线索，不会自动合并</small></div>
+              </div>
+              <div id="related-list" class="related-list"></div>
+            </section>
+
+            <section class="decision-history-section">
+              <details>
+                <summary>审核历史</summary>
+                <div id="decision-history" class="decision-history"></div>
+              </details>
+            </section>
+
+            <div class="detail-actions">
+              <button class="decision-button reject" type="button" data-detail-status="rejected">拒绝</button>
+              <button class="decision-button pending" type="button" data-detail-status="pending">暂缓</button>
+              <button class="decision-button confirm" type="button" data-detail-status="confirmed">接受并确认</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div id="selection-bar" class="selection-bar" hidden>
+        <strong id="selection-label"></strong>
+        <input id="batch-note" type="text" placeholder="可选：本次批量决定备注">
+        <button class="decision-button reject compact" type="button" data-batch-status="rejected">批量拒绝</button>
+        <button class="decision-button pending compact" type="button" data-batch-status="pending">批量暂缓</button>
+        <button class="decision-button confirm compact" type="button" data-batch-status="confirmed">批量接受</button>
+      </div>
+
+      <aside id="help-drawer" class="help-drawer" aria-hidden="true">
+        <header><div><p class="eyebrow">REVIEW GUIDE</p><h2>接受还是拒绝？</h2></div><button id="help-close" class="icon-button" type="button">×</button></header>
+        <div class="help-scroll">
+          <section class="guide-block accept-guide"><h3>接受</h3><ul><li>确实是你本人直接表达，而不是引用、例子或转述。</li><li>未来回答仍可能用得上，且表述脱离原会话也能理解。</li><li>一条候选只保留一个事实、偏好、边界或仍有效计划。</li><li>必要时先编辑，再接受；原始消息会继续保留作证据。</li></ul></section>
+          <section class="guide-block reject-guide"><h3>拒绝</h3><ul><li>只是单次任务指令，如“不要解释，直接改这个文件”。</li><li>正则误命中、引用他人的话、问题假设或提示词模板。</li><li>已经过期、已经完成、被后续陈述推翻，或并非关于你。</li><li>原话混合很多内容，无法提炼成一条准确记忆。</li></ul></section>
+          <section class="guide-block pending-guide"><h3>暂缓</h3><ul><li>需要更多上下文才能判断。</li><li>与另一条候选可能冲突，但尚未决定当前状态。</li><li>时间敏感计划的有效性需要你稍后确认。</li></ul></section>
+          <section class="kind-guide"><h3>四种候选</h3><dl><div><dt>身份</dt><dd>姓名、职业、专业等相对稳定资料。</dd></div><div><dt>偏好</dt><dd>语言、格式、工具和协作风格。</dd></div><div><dt>边界</dt><dd>跨会话也应遵守的“不要/禁止/无需”。</dd></div><div><dt>计划</dt><dd>正在进行或准备做的事情，最容易过期。</dd></div></dl></section>
+        </div>
+      </aside>
+      <button id="drawer-backdrop" class="drawer-backdrop" type="button" tabindex="-1" aria-label="关闭判断指南"></button>
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+      <div id="rebuild-modal" class="modal-backdrop" hidden>
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="rebuild-title">
+          <p class="eyebrow">CONFIRMED ONLY</p><h2 id="rebuild-title">重建画像与迁移包</h2>
+          <p>只会使用当前状态为“已确认”的候选；被拒绝和待定的条目不会进入输出。</p>
+          <div id="rebuild-result" class="rebuild-result" hidden></div>
+          <div class="modal-actions"><button id="rebuild-cancel" class="quiet-button" type="button">取消</button><button id="rebuild-confirm" class="primary-button" type="button">开始重建</button></div>
+        </section>
+      </div>
+    </div>
+    <noscript>交互式记忆审核需要启用 JavaScript，并通过本地审核服务打开。</noscript>
+  </body>
+</html>

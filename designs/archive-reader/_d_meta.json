@@ -1,0 +1,24 @@
+{
+  "type": "design",
+  "designSystems": [],
+  "primaryDesignSystem": null,
+  "assets": {
+    "Archive Reader": {
+      "versions": [
+        {
+          "path": "index.html",
+          "createdAt": "2026-08-10T16:20:28.493Z",
+          "status": "needs-review",
+          "subtitle": "Evidence-first reader and deterministic insights prototype",
+          "viewport": {
+            "width": 1440,
+            "height": 960
+          },
+          "section": "Reader and insights"
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-08-10T16:20:28.493Z",
+  "updatedAt": "2026-08-10T16:47:51.213Z"
+}

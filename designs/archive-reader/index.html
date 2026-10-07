@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="个人对话档案阅读器视觉原型，全部内容均为模拟数据。">
+    <link rel="icon" href="data:,">
+    <title>Archive Reader — 视觉原型</title>
+    <!--
+      设计假设
+      - 这是一个证据优先的本地阅读器，不是聊天服务，也不承担编辑原始记录的职责。
+      - 目标用户熟悉 ChatGPT 的会话浏览模式，因此沿用“侧栏 + 阅读列”，但以证据状态和来源抽屉形成差异。
+      - 本原型只包含手工编写的模拟数据；不读取真实导出、账户标识或 SQLite。
+
+      视觉理由
+      - 编辑型工具气质：暖白纸面、森林绿状态色、低饱和边界，长时间阅读不刺眼。
+      - 角色不靠大色块气泡区分，而靠头像、标签、间距和窄阅读列维持连续阅读。
+      - “主线 / 分支 / 快照 / 溯源”在同一界面中逐级展开，避免元数据淹没正文。
+    -->
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot-state" role="status">正在载入模拟档案…</div>
+    </div>
+    <noscript>此交互原型需要 JavaScript。</noscript>
+
+    <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+    <script type="text/babel" src="mock-data.jsx"></script>
+    <script type="text/babel" src="icons.jsx"></script>
+    <script type="text/babel" src="components.jsx"></script>
+    <script type="text/babel" src="components-insights.jsx"></script>
+    <script type="text/babel" src="app.jsx"></script>
+  </body>
+</html>

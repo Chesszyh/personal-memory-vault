@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Personal Memory Vault Archive Reader",
+  "version": "0.1.0",
+  "description": "Read-only, offline IndexedDB evidence exporter for a recovery working copy.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3Mkr2uKCpk7x1r+8OXwy52Q9TQowsNVfXyIp3ASNMjtotjD4xYPTBlvZ6fP9rVfeh+wHiXJrDWPKbNVzB77ofadVC6w5nO9OPXu7qJ1ZgY7j8pJ1Yca2eCLTJsuTamNlxCn3sTTALkORx5TKwAPIjo31Tr8GaO8vXF7bYAljzdikjAmeN6Hn8aUfLqsGzWONsx7GztiTRMJA+k0AEnY2xJWw37nz5BERHyMNybKsuaeUW0055V9mPRafJ9Bn8iO1R6wynM0nSWhBCJUk2FxsRv6KKF+in1q1cSo4XF/ljpheaDT6iyeMIsrubWC2HHP0o01rq4/wLD0/vctqSGhhowIDAQAB",
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  }
+}

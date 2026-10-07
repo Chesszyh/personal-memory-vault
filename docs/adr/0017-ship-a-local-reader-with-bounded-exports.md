@@ -1,0 +1,3 @@
+# Ship a local reader with bounded exports
+
+The primary Reading Archive will be a local web application with a conversation sidebar, full-text search, date and Source filters, current-branch reading, alternative-branch expansion, attachment access, Provenance, and health warnings. It will also generate bounded per-conversation static HTML and selective PDF exports rather than a single giant document. Acceptance runs automated invariants over the complete corpus, programmatic comparisons over at least 100 stratified samples, and human reading checks over at least 30 representative conversations spanning branches, edits, attachments, long threads, and multiple periods.

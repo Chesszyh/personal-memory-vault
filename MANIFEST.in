@@ -1,0 +1,4 @@
+include LICENSE README.md
+recursive-include src/personal_vault/reader_static *.html *.css *.js *LICENSE*
+recursive-include src/personal_vault/memory_review_static *.html *.css *.js
+include src/personal_vault/schema.sql

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'"
+    >
+    <meta name="color-scheme" content="light dark">
+    <link rel="icon" href="data:,">
+    <title>Archive Reader</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="/static/app.js"></script>
+  </head>
+  <body>
+    <div id="app" class="app-shell" data-view="reader">
+      <aside id="sidebar" class="sidebar" aria-label="归档导航">
+        <header class="sidebar-header">
+          <div class="brand-lockup">
+            <span class="brand-mark" aria-hidden="true">AR</span>
+            <span class="brand-copy">
+              <strong>Archive Reader</strong>
+              <small>个人对话档案</small>
+            </span>
+          </div>
+          <button id="close-sidebar" class="icon-button mobile-only" type="button" aria-label="关闭会话列表">×</button>
+        </header>
+
+        <div class="workspace-switch" role="tablist" aria-label="归档工作区">
+          <button id="show-reader" class="workspace-tab is-active" type="button" role="tab" aria-selected="true">
+            <span aria-hidden="true">▤</span><span>阅读</span>
+          </button>
+          <button id="show-groups" class="workspace-tab" type="button" role="tab" aria-selected="false">
+            <span aria-hidden="true">◎</span><span>群聊</span>
+          </button>
+          <button id="show-analytics" class="workspace-tab" type="button" role="tab" aria-selected="false">
+            <span aria-hidden="true">⌁</span><span>洞察</span>
+          </button>
+        </div>
+
+        <label class="archive-scope" for="archive-scope">浏览范围
+          <select id="archive-scope"><option value="all">全部会话</option></select>
+        </label>
+        <form id="search-form" class="search-wrap" role="search">
+          <label class="search-box" for="search-input">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input id="search-input" type="search" autocomplete="off" placeholder="搜索标题或消息正文" aria-describedby="search-guidance">
+            <kbd id="search-shortcut" aria-hidden="true">/</kbd>
+            <button id="clear-search" class="clear-button" type="button" aria-label="清空搜索" hidden>×</button>
+          </label>
+          <p id="search-guidance" class="search-guidance" role="status" aria-live="polite">1–2 个字符将使用逐字匹配；3 个以上使用全文索引</p>
+        </form>
+
+        <div class="list-summary-row">
+          <span id="list-summary">正在读取会话…</span>
+          <button id="retry-list" class="quiet-button" type="button" hidden>重试</button>
+        </div>
+
+        <nav id="conversation-list" class="conversation-list" aria-label="会话列表" aria-busy="true"></nav>
+        <div class="list-footer">
+          <button id="load-more" class="load-more-button" type="button" hidden>加载更多会话</button>
+          <div id="list-loading" class="compact-loading" role="status">正在加载…</div>
+        </div>
+
+        <footer class="sidebar-footer">
+          <button id="open-snapshots" class="snapshot-compact" type="button">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span class="snapshot-copy">
+              <strong id="snapshot-summary-title">正在检查快照</strong>
+              <small id="snapshot-summary-meta">等待本地 API</small>
+            </span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <p>本地只读视图；源缺席不等于删除。</p>
+        </footer>
+      </aside>
+
+      <main class="main-stage">
+        <header class="topbar">
+          <div class="topbar-leading">
+            <button id="open-sidebar" class="icon-button mobile-only" type="button" aria-label="打开会话列表">☰</button>
+            <div class="topbar-title">
+              <strong id="topbar-conversation-title">Archive Reader</strong>
+              <small id="topbar-meta">选择一条会话开始阅读</small>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <button id="theme-toggle" class="icon-button" type="button" aria-label="切换深浅主题" title="切换深浅主题">◐</button>
+            <button id="drawer-toggle" class="icon-button" type="button" aria-label="打开来源与快照" aria-expanded="false" title="来源与快照">▣</button>
+          </div>
+        </header>
+
+        <section id="reader-view" class="reader-view" aria-label="会话阅读器">
+          <div id="snapshot-banner" class="snapshot-banner" hidden>
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="snapshot-banner-copy">来源快照</span>
+            <strong id="snapshot-banner-status">已导入</strong>
+          </div>
+          <div id="reader-scroll" class="reader-scroll">
+            <div id="reader-state" class="center-state" role="status">
+              <span class="spinner" aria-hidden="true"></span>
+              <strong>正在准备离线阅读器</strong>
+              <span>正在读取本地归档索引…</span>
+            </div>
+            <article id="conversation" class="conversation" hidden>
+              <header class="conversation-header">
+                <p id="conversation-eyebrow" class="eyebrow">READING ARCHIVE</p>
+                <h1 id="conversation-title"></h1>
+                <p id="conversation-summary" class="conversation-summary"></p>
+                <div id="conversation-badges" class="badge-row" aria-label="会话状态"></div>
+              </header>
+              <div id="message-list" class="message-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="analytics-view" class="analytics-view" aria-label="归档洞察" hidden>
+          <div class="analytics-scroll">
+            <header class="analytics-header">
+              <p class="eyebrow">DETERMINISTIC INSIGHTS</p>
+              <h1>归档洞察</h1>
+              <p>所有指标均由规范化记录确定性聚合；这里不把模型推断当成个人事实。</p>
+            </header>
+            <div id="analytics-state" class="center-state" role="status">
+              <span class="spinner" aria-hidden="true"></span>
+              <strong>正在计算归档指标</strong>
+            </div>
+            <div id="analytics-content" class="analytics-content" hidden></div>
+          </div>
+        </section>
+      </main>
+
+      <aside id="drawer" class="drawer" aria-label="来源与快照" aria-hidden="true">
+        <header class="drawer-header">
+          <div>
+            <strong>来源与快照</strong>
+            <small>可追溯的只读记录</small>
+          </div>
+          <button id="close-drawer" class="icon-button" type="button" aria-label="关闭来源抽屉">×</button>
+        </header>
+        <div class="drawer-tabs" role="tablist" aria-label="来源信息">
+          <button id="show-provenance" class="drawer-tab is-active" type="button" role="tab" aria-selected="true">溯源</button>
+          <button id="show-snapshots" class="drawer-tab" type="button" role="tab" aria-selected="false">快照</button>
+        </div>
+        <div id="drawer-state" class="drawer-scroll"></div>
+      </aside>
+
+      <button id="sidebar-backdrop" class="backdrop sidebar-backdrop" type="button" aria-label="关闭会话列表" tabindex="-1"></button>
+      <button id="drawer-backdrop" class="backdrop drawer-backdrop" type="button" aria-label="关闭来源抽屉" tabindex="-1"></button>
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    </div>
+    <noscript>Archive Reader 需要启用 JavaScript 才能读取本地 API。</noscript>
+  </body>
+</html>

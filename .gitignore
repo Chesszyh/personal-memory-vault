@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Private data and generated archive products never belong in this repository.
+vault/
+data/
+*.sqlite
+*.sqlite3
+*.db
+*.ndjson
