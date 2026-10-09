@@ -77,11 +77,13 @@ def run_suite(vault, cases, output, integration, *, provider, model, thinking, t
                 except subprocess.TimeoutExpired:
                     status = "timeout"
             events = []
-            for line in (output / f"{stem}.jsonl").read_text().splitlines():
-                try:
-                    events.append(json.loads(line))
-                except json.JSONDecodeError:
-                    status = "invalid_json"
+            # Unicode line separators inside JSON strings are not JSONL delimiters.
+            with (output / f"{stem}.jsonl").open(encoding="utf-8") as stream:
+                for line in stream:
+                    try:
+                        events.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        status = "invalid_json"
             summary = summarize_events(events)
             if status == "completed" and (summary["stop_reason"] != "stop" or not summary["answer"]):
                 status = "incomplete_answer"

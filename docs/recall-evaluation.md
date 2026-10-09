@@ -63,6 +63,8 @@ env PYTHONPATH=src python -m personal_vault.evaluate_pi VAULT_ROOT CASES_JSON --
 
 报告目录保存逐题 JSONL 原始事件、标准错误和 `report.json`。按完成的助手消息累计模型用量，缺失用量保留 `null`，不当成零；token 总数直接采用 provider 返回的 `totalTokens`，不重复加 reasoning。工具返回长度统计整个工具文本，包含 JSON 标识字段，与检索基线的正文字符数口径不同。
 
+JSONL 事件以 UTF-8 按文件行读取；JSON 字符串内的 Unicode 换行符（如 U+2028、U+2029）作为正文保留，不会被误判为事件边界。
+
 进程失败、超时或未生成完整最终回答时，保存当前证据并停止后续调用。默认单次超时可通过 `--timeout` 调整。逐题阅读最终回答及工具返回，在私人目录另存判断记录，注明所依据的消息、未命中及误用；运行完成本身不等于回答正确。
 
 ## 语义检索的验收口径
