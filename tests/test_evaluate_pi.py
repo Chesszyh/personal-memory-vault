@@ -54,6 +54,54 @@ class PiEvaluationTests(unittest.TestCase):
             self.assertTrue(all("SECRET_EXPECTATION" not in str(c) for c in commands))
             self.assertTrue((root / "out/01-with-memory.jsonl").exists())
 
+    def test_unicode_separators_preserve_jsonl_events_and_answers(self):
+        for separator in ("\u0085", "\u2028", "\u2029"):
+            for newline in ("\n", "\r\n"):
+                with self.subTest(separator=repr(separator), newline=repr(newline)), \
+                     tempfile.TemporaryDirectory() as temp:
+                    root = Path(temp)
+                    answer = f"第一段{separator}第二段"
+                    events = [{"type": "agent_start"},
+                              assistant([{"type": "text", "text": answer}])]
+                    # Keep literal Unicode in a multi-record stream, without a final newline.
+                    raw = newline.join(json.dumps(event, ensure_ascii=False) for event in events)
+
+                    def run(args, **kwargs):
+                        kwargs["stdout"].buffer.write(raw.encode("utf-8"))
+                        return SimpleNamespace(returncode=0)
+
+                    with patch("personal_vault.evaluate_pi.evaluate", return_value={"snapshots": []}), \
+                         patch("personal_vault.evaluate_pi.subprocess.run", side_effect=run) as process:
+                        report = run_suite(root, [{"id": "unicode", "question": "q"}], root / "out", root,
+                                           provider="test", model="fixture", thinking="low")
+                    self.assertEqual(process.call_count, 2)
+                    saved = json.loads((root / "out/report.json").read_text(encoding="utf-8"))
+                    self.assertEqual([run["answer"] for run in saved["runs"]], [answer, answer])
+                    self.assertEqual([run["mode"] for run in report["runs"]], ["no-memory", "with-memory"])
+                    for result in report["runs"]:
+                        self.assertEqual(result["status"], "completed")
+                        self.assertEqual(result["answer"], answer)
+                        self.assertEqual(result["model_calls"], 1)
+                        self.assertEqual((root / "out" / result["raw_events"]).read_bytes(), raw.encode("utf-8"))
+
+    def test_invalid_json_still_saves_evidence_and_stops_suite(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+
+            def run(args, **kwargs):
+                kwargs["stdout"].write("not json\n")
+                return SimpleNamespace(returncode=0)
+
+            with patch("personal_vault.evaluate_pi.evaluate", return_value={"snapshots": []}), \
+                 patch("personal_vault.evaluate_pi.subprocess.run", side_effect=run) as process:
+                with self.assertRaisesRegex(RuntimeError, "invalid_json"):
+                    run_suite(root, [{"id": "one", "question": "q"}], root / "out", root,
+                              provider="test", model="fixture", thinking="low")
+            self.assertEqual(process.call_count, 1)
+            report = json.loads((root / "out/report.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["runs"][0]["status"], "invalid_json")
+            self.assertEqual((root / "out/01-no-memory.jsonl").read_text(encoding="utf-8"), "not json\n")
+
     def test_failure_saves_evidence_and_stops_suite(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
